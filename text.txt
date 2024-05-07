@@ -1,0 +1,7 @@
+Livres et Auteurs : 
+Vous pourriez créer un système de gestion 
+pour les livres et les auteurs. Les livres 
+pourraient avoir des attributs tels que le titre,
+ le genre, l'auteur, l'année de publication, etc.
+  Les auteurs pourraient avoir des attributs comme 
+  le nom, la nationalité, la date de naissance, etc.

@@ -1,0 +1,37 @@
+syntax = "proto3";
+package livre;
+// Définition du message livre
+message Livre {
+string id = 1;
+string titre = 2;
+string genre = 3;
+string auteur = 4;
+}
+// Définition des messages de requête et de réponse pour les méthodes d
+message GetLivreRequest {
+string livre_id = 1;
+}
+message GetLivreResponse {
+Livre livre = 1;
+}
+message SearchLivresRequest {
+string query = 1;
+}
+message SearchLivresResponse {
+repeated Livre livres = 1;
+}
+message CreateLivreRequest {
+string titre = 1;
+string genre = 2;
+string auteur = 3;
+}
+message CreateLivreResponse {
+Livre livre = 1;
+}
+// Définition du service de films
+service LivreService {
+rpc GetLivre(GetLivreRequest) returns (GetLivreResponse);
+rpc SearchLivre(SearchLivresRequest) returns (SearchLivresResponse);
+rpc CreateLivre(CreateLivreRequest) returns (CreateLivreResponse);
+// Ajouter d'autres méthodes au besoin
+}

@@ -1,0 +1,34 @@
+syntax = "proto3";
+package auteur;
+
+// Définition du message Auteur
+message Auteur {
+    string id = 1;
+    string nom = 2;
+    string nationalite = 3;
+    // Ajouter d'autres champs de données pour l'auteur au besoin
+}
+
+// Définition des messages de requête et de réponse pour les méthodes
+message GetAuteurRequest {
+    string auteur_id = 1;
+}
+
+message GetAuteurResponse {
+    Auteur auteur = 1;
+}
+
+message SearchAuteursRequest {
+    string query = 1;
+}
+
+message SearchAuteursResponse {
+    repeated Auteur auteurs = 1;
+}
+
+// Définition du service d'auteurs
+service AuteurService {
+    rpc GetAuteur(GetAuteurRequest) returns (GetAuteurResponse);
+    rpc SearchAuteurs(SearchAuteursRequest) returns (SearchAuteursResponse);
+    // Ajouter d'autres méthodes au besoin
+}
