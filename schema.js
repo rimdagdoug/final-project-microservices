@@ -24,7 +24,7 @@ type Query {
 
 type Mutation {
   createLivre(titre: String!, genre: String!, auteur: String!): Livre
-  # Ajouter d'autres mutations au besoin
+  deleteLivre(id: String!): Boolean
 }
 `;
 

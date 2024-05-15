@@ -1,6 +1,6 @@
-// resolvers.js
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+const Livre = require('./models/Livre');
 
 // Charger le fichier proto pour le service de livre
 const livreProtoPath = 'livre.proto';
@@ -24,9 +24,9 @@ const auteurProtoDefinition = protoLoader.loadSync(auteurProtoPath, {
 });
 const auteurProto = grpc.loadPackageDefinition(auteurProtoDefinition).auteur;
 
-// Définir les résolveurs pour les requêtes GraphQL
 const resolvers = {
   Query: {
+    // Récupérer un livre par son ID
     livre: (_, { id }) => {
       // Effectuer un appel gRPC au microservice de livres
       const client = new livreProto.LivreService('localhost:50051', grpc.credentials.createInsecure());
@@ -40,6 +40,7 @@ const resolvers = {
         });
       });
     },
+    // Récupérer tous les livres
     livres: () => {
       // Effectuer un appel gRPC au microservice de livres
       const client = new livreProto.LivreService('localhost:50051', grpc.credentials.createInsecure());
@@ -53,6 +54,7 @@ const resolvers = {
         });
       });
     },
+    // Récupérer un auteur par son ID
     auteur: (_, { id }) => {
       // Effectuer un appel gRPC au microservice d'auteurs
       const client = new auteurProto.AuteurService('localhost:50053', grpc.credentials.createInsecure());
@@ -66,6 +68,7 @@ const resolvers = {
         });
       });
     },
+    // Récupérer tous les auteurs
     auteurs: () => {
       // Effectuer un appel gRPC au microservice d'auteurs
       const client = new auteurProto.AuteurService('localhost:50053', grpc.credentials.createInsecure());
@@ -81,7 +84,20 @@ const resolvers = {
     },
   },
   Mutation: {
-    createLivre: (_, { titre, genre, auteur }) => {
+    // Créer un nouveau livre
+    createLivre: async (_, { titre, genre, auteur }) => {
+      // Créez une nouvelle instance de Livre avec les données fournies
+      const newLivre = new Livre({ titre, genre, auteur });
+
+      // Enregistrez le livre dans MongoDB
+      try {
+        await newLivre.save();
+        console.log('Livre enregistré dans MongoDB:', newLivre);
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement du livre dans MongoDB:', error);
+        throw new Error('Erreur lors de l\'enregistrement du livre dans MongoDB');
+      }
+
       // Effectuer un appel gRPC au microservice de livres pour créer un nouveau livre
       const client = new livreProto.LivreService('localhost:50051', grpc.credentials.createInsecure());
       return new Promise((resolve, reject) => {
@@ -94,7 +110,19 @@ const resolvers = {
         });
       });
     },
-  },
+    // Supprimer un livre par son ID
+    deleteLivre: async (_, { id }) => {
+      // Supprimer le livre correspondant dans la base de données MongoDB
+      try {
+        await Livre.findByIdAndDelete(id);
+        console.log('Livre supprimé avec succès');
+        return true;
+      } catch (error) {
+        console.error('Erreur lors de la suppression du livre dans MongoDB:', error);
+        return false;
+      }
+    }
+  }
 };
 
 module.exports = resolvers;
