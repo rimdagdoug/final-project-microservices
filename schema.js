@@ -21,13 +21,19 @@ type Query {
   auteur(id: String!): Auteur
   auteurs: [Auteur]
   getAllLivres: [Livre]
+  getAllAuteurs: [Auteur]
+ 
 }
 
 type Mutation {
   createLivre(titre: String!, genre: String!, auteur: String!): Livre
   deleteLivre(id: String!): Boolean
-  getAllLivres: [Livre] # Ajout de la mutation pour récupérer tous les livres
+  getAllLivres: [Livre]
+  createAuteur(nom: String!, nationalite: String!): Auteur
+  getAllAuteurs: [Auteur]
+  deleteAuteur(id: String!): Boolean
 }
+
 `;
 
 module.exports = typeDefs;

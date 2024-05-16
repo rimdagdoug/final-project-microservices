@@ -1,6 +1,7 @@
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const Livre = require('./models/Livre');
+const Auteur = require('./models/Auteur');
 
 // Charger le fichier proto pour le service de livre
 const livreProtoPath = 'livre.proto';
@@ -40,20 +41,6 @@ const resolvers = {
         });
       });
     },
-    // Récupérer tous les livres
-    // livres: () => {
-    //   // Effectuer un appel gRPC au microservice de livres
-    //   const client = new livreProto.LivreService('localhost:50051', grpc.credentials.createInsecure());
-    //   return new Promise((resolve, reject) => {
-    //     client.SearchLivre({}, (err, response) => { // Correction ici
-    //       if (err) {
-    //         reject(err);
-    //       } else {
-    //         resolve(response.livres);
-    //       }
-    //     });
-    //   });
-    // },
     // Récupérer un auteur par son ID
     auteur: (_, { id }) => {
       // Effectuer un appel gRPC au microservice d'auteurs
@@ -132,6 +119,57 @@ const resolvers = {
       } catch (error) {
         console.error('Erreur lors de la récupération de tous les livres:', error);
         throw new Error('Erreur lors de la récupération de tous les livres');
+      }
+    },
+    // Créer un nouvel auteur
+    createAuteur: async (_, { nom, nationalite }) => {
+      // Créez une nouvelle instance d'Auteur avec les données fournies
+      const newAuteur = new Auteur({ nom, nationalite });
+    
+      // Enregistrez l'auteur dans MongoDB
+      try {
+        await newAuteur.save();
+        console.log('Auteur enregistré dans MongoDB:', newAuteur);
+      } catch (error) {
+        console.error('Erreur lors de l\'enregistrement de l\'auteur dans MongoDB:', error);
+        throw new Error('Erreur lors de l\'enregistrement de l\'auteur dans MongoDB');
+      }
+    
+      // Effectuer un appel gRPC au microservice d'auteurs pour créer un nouvel auteur
+      const client = new auteurProto.AuteurService('localhost:50053', grpc.credentials.createInsecure());
+      return new Promise((resolve, reject) => {
+        client.createAuteur({ nom, nationalite }, (err, response) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(response.auteur);
+          }
+        });
+      });
+    },
+
+     // Récupérer tous les Auteurs
+     getAllAuteurs: async () => {
+      try {
+        console.log('Début de la récupération de tous les auteurs...');
+        const auteurs = await Auteur.find(); 
+        console.log('Livres récupérés avec succès:', auteurs.length);
+        return auteurs;
+      } catch (error) {
+        console.error('Erreur lors de la récupération de tous les livres:', error);
+        throw new Error('Erreur lors de la récupération de tous les livres');
+      }
+    },
+
+    deleteAuteur: async (_, { id }) => {
+      // Supprimer le livre correspondant dans la base de données MongoDB
+      try {
+        await Auteur.findByIdAndDelete(id);
+        console.log('Auteur supprimé avec succès');
+        return true;
+      } catch (error) {
+        console.error('Erreur lors de la suppression du livre dans MongoDB:', error);
+        return false;
       }
     },
   },
