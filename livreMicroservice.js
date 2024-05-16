@@ -53,17 +53,17 @@ let identifiant = 0;
 
 // Implémenter le service livre
 const livreService = {
-  getLivre: (call, callback) => {
-    // Récupérer les détails du livre à partir de la base de données
-    const livre = {
-      id: call.request.livre_id,
-      titre: 'Exemple de livre',
-      genre: 'Fiction',
-      auteur: 'Auteur Inconnu',
-      // Ajouter d'autres champs de données pour le livre au besoin
-    };
-    callback(null, { livre });
-  },
+  // getLivre: (call, callback) => {
+  //   // Récupérer les détails du livre à partir de la base de données
+  //   const livre = {
+  //     id: call.request.livre_id,
+  //     titre: 'Exemple de livre',
+  //     genre: 'Fiction',
+  //     auteur: 'Auteur Inconnu',
+  //     // Ajouter d'autres champs de données pour le livre au besoin
+  //   };
+  //   callback(null, { livre });
+  // },
   searchLivres: (call, callback) => {
     const { query } = call.request;
     // Effectuer une recherche de livres en fonction de la requête

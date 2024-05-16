@@ -14,6 +14,7 @@ const auteurProtoDefinition = protoLoader.loadSync(auteurProtoPath, {
 const auteurProto = grpc.loadPackageDefinition(auteurProtoDefinition).auteur;
 
 // Implémenter le service d'auteurs
+// Implémenter le service d'auteurs
 const auteurService = {
   getAuteur: (call, callback) => {
     // Récupérer les détails de l'auteur à partir de la base de données
@@ -43,8 +44,37 @@ const auteurService = {
     ];
     callback(null, { auteurs });
   },
-  // Ajouter d'autres méthodes au besoin
+  createAuteur: (call, callback) => {
+    const { nom, nationalite } = call.request;
+    // Logique pour créer un nouvel auteur avec les données fournies dans 'nom' et 'nationalite'
+    // Assurez-vous d'envoyer la réponse appropriée via 'callback'
+    const nouvelAuteur = {
+      id: '123', // Générez un ID unique pour le nouvel auteur
+      nom: nom,
+      nationalite: nationalite,
+    };
+    callback(null, { auteur: nouvelAuteur });
+  },
+  deleteAuteur: (call, callback) => {
+    const { id } = call.request;
+    // Logique pour supprimer l'auteur avec l'ID donné
+    // Assurez-vous d'envoyer la réponse appropriée via 'callback'
+    callback(null, { message: 'Auteur supprimé avec succès' });
+},
+  updateAuteur: (call, callback) => {
+    const { id, nom, nationalite } = call.request;
+    // Logique pour mettre à jour les détails de l'auteur avec les données fournies
+    // Assurez-vous d'envoyer la réponse appropriée via 'callback'
+    const updatedAuteur = {
+        id: id,
+        nom: nom,
+        nationalite: nationalite,
+    };
+    callback(null, { auteur: updatedAuteur });
+}
+
 };
+
 
 // Créer et démarrer le serveur gRPC
 const server = new grpc.Server();

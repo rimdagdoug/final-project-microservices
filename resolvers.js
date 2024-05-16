@@ -127,7 +127,7 @@ const resolvers = {
       try {
         console.log('Début de la récupération de tous les livres...');
         const livres = await Livre.find(); // Utiliser Mongoose pour récupérer tous les livres
-        console.log('Livres récupérés avec succès:', livres);
+        console.log('Livres récupérés avec succès:', livres.length);
         return livres;
       } catch (error) {
         console.error('Erreur lors de la récupération de tous les livres:', error);

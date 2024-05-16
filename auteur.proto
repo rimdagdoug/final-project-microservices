@@ -26,9 +26,42 @@ message SearchAuteursResponse {
     repeated Auteur auteurs = 1;
 }
 
+// Définition du message de requête et de réponse pour la création d'un auteur
+message CreateAuteurRequest {
+    string nom = 1;
+    string nationalite=2;
+}
+
+message CreateAuteurResponse {
+    Auteur auteur = 1;
+}
+
+// Définition du message de requête et de réponse pour la suppression d'un auteur
+message DeleteAuteurRequest {
+    string id = 1;
+}
+
+message DeleteAuteurResponse {
+    string message = 1;
+}
+
+// Définition du message de requête et de réponse pour la mise à jour d'un auteur
+message UpdateAuteurRequest {
+    string id = 1;
+    string nom = 2;
+    string nationalite = 3;
+}
+
+message UpdateAuteurResponse {
+    Auteur auteur = 1;
+}
+
 // Définition du service d'auteurs
 service AuteurService {
     rpc GetAuteur(GetAuteurRequest) returns (GetAuteurResponse);
     rpc SearchAuteurs(SearchAuteursRequest) returns (SearchAuteursResponse);
-    // Ajouter d'autres méthodes au besoin
+    rpc CreateAuteur(CreateAuteurRequest) returns (CreateAuteurResponse);
+    rpc DeleteAuteur(DeleteAuteurRequest) returns (DeleteAuteurResponse);
+    rpc UpdateAuteur(UpdateAuteurRequest) returns (UpdateAuteurResponse);
+    
 }

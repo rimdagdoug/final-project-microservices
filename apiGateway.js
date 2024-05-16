@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 
 // MongoDB Livre model
 const Livre = require('./models/Livre');
+const Auteur = require('./models/Auteur');
 
 // Load GraphQL type definitions
 const typeDefs = require('./schema');
@@ -157,6 +158,118 @@ app.put('/livres/:id', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+// REST endpoint for creating auteurs
+app.post('/auteurs', async (req, res) => {
+    try {
+        const { nom, nationalite } = req.body;
+
+        // Create a new instance of Auteur
+        const newAuteur = new Auteur({ nom, nationalite });
+
+        // Save the author in MongoDB
+        const savedAuteur = await newAuteur.save();
+
+        console.log('Auteur enregistré dans MongoDB:', savedAuteur);
+
+        // Create a gRPC client for AuteurService
+        const client = new auteurProto.AuteurService('localhost:50053', grpc.credentials.createInsecure());
+
+        // Make gRPC call to create an author
+        client.createAuteur({ nom, nationalite }, (err, response) => {
+            if (err) {
+                console.error('Erreur lors de l\'appel gRPC:', err);
+                res.status(500).json({ error: err.message });
+            } else {
+                console.log('Auteur enregistré dans le service gRPC:', response.auteur);
+                res.status(201).json(response.auteur);
+            }
+        });
+    } catch (err) {
+        console.error('Erreur lors de la création de l\'auteur:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// REST endpoint for retrieving all auteurs
+app.get('/auteurs', async (req, res) => {
+    try {
+        // Retrieve all authors from MongoDB
+        const auteurs = await Auteur.find();
+
+        console.log('Auteurs récupérés depuis MongoDB:', auteurs);
+
+        res.status(200).json(auteurs);
+    } catch (err) {
+        console.error('Erreur lors de la récupération des auteurs:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// REST endpoint for deleting an auteur by id
+app.delete('/auteurs/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Delete the author from MongoDB
+        const deletedAuteur = await Auteur.findByIdAndDelete(id);
+
+        if (!deletedAuteur) {
+            return res.status(404).json({ error: 'Auteur non trouvé' });
+        }
+
+        console.log('Auteur supprimé avec succès:', deletedAuteur);
+
+        // Make a gRPC call to delete the author in the gRPC service
+        const client = new auteurProto.AuteurService('localhost:50053', grpc.credentials.createInsecure());
+        client.deleteAuteur({ id }, (err, response) => {
+            if (err) {
+                console.error('Erreur lors de l\'appel gRPC pour supprimer l\'auteur:', err);
+                res.status(500).json({ error: err.message });
+            } else {
+                console.log('Auteur supprimé dans le service gRPC:', response);
+                res.status(200).json({ message: 'Auteur supprimé avec succès' });
+            }
+        });
+    } catch (err) {
+        console.error('Erreur lors de la suppression de l\'auteur:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// REST endpoint for updating an auteur by id
+app.put('/auteurs/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { nom, nationalite } = req.body;
+
+        // Update the author in MongoDB
+        const updatedAuteur = await Auteur.findByIdAndUpdate(id, { nom, nationalite }, { new: true });
+
+        if (!updatedAuteur) {
+            return res.status(404).json({ error: 'Auteur non trouvé' });
+        }
+
+        console.log('Auteur mis à jour avec succès dans MongoDB:', updatedAuteur);
+
+        // Make a gRPC call to update the author in the gRPC service
+        const client = new auteurProto.AuteurService('localhost:50053', grpc.credentials.createInsecure());
+        client.updateAuteur({ id, nom, nationalite }, (err, response) => {
+            if (err) {
+                console.error('Erreur lors de l\'appel gRPC pour mettre à jour l\'auteur:', err);
+                res.status(500).json({ error: err.message });
+            } else {
+                console.log('Auteur mis à jour dans le service gRPC:', response.auteur);
+                res.status(200).json(response.auteur);
+            }
+        });
+    } catch (err) {
+        console.error('Erreur lors de la mise à jour de l\'auteur:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 
 // GraphQL server setup
 const apolloServer = new ApolloServer({ typeDefs, resolvers });
