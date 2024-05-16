@@ -1,4 +1,3 @@
-//livreMicroservices.js
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const { Kafka } = require('kafkajs');
@@ -68,6 +67,8 @@ const livreService = {
   searchLivres: (call, callback) => {
     const { query } = call.request;
     // Effectuer une recherche de livres en fonction de la requête
+    // Ici, vous devriez implémenter la logique de recherche réelle
+    // et renvoyer les résultats sous forme de liste de livres
     const livres = [
       {
         id: '1',
@@ -100,7 +101,20 @@ const livreService = {
     await sendMessage('livres-topic', livre);
     callback(null, { livre });
   },
-  // Ajouter d'autres méthodes au besoin
+  updateLivre: async (call, callback) => {
+    const { id, titre, genre, auteur } = call.request;
+    // Mettre à jour le livre dans la base de données ou effectuer toute autre opération nécessaire
+    const livre = {
+      id,
+      titre,
+      genre,
+      auteur,
+      // Ajouter d'autres champs de données pour le livre au besoin
+    };
+    // Envoyer un message au topic Kafka lors de la mise à jour d'un livre
+    await sendMessage('livres-topic', livre);
+    callback(null, { livre });
+  }
 };
 
 // Créer et démarrer le serveur gRPC

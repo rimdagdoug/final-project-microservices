@@ -41,19 +41,19 @@ const resolvers = {
       });
     },
     // Récupérer tous les livres
-    livres: () => {
-      // Effectuer un appel gRPC au microservice de livres
-      const client = new livreProto.LivreService('localhost:50051', grpc.credentials.createInsecure());
-      return new Promise((resolve, reject) => {
-        client.searchLivres({}, (err, response) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(response.livres);
-          }
-        });
-      });
-    },
+    // livres: () => {
+    //   // Effectuer un appel gRPC au microservice de livres
+    //   const client = new livreProto.LivreService('localhost:50051', grpc.credentials.createInsecure());
+    //   return new Promise((resolve, reject) => {
+    //     client.SearchLivre({}, (err, response) => { // Correction ici
+    //       if (err) {
+    //         reject(err);
+    //       } else {
+    //         resolve(response.livres);
+    //       }
+    //     });
+    //   });
+    // },
     // Récupérer un auteur par son ID
     auteur: (_, { id }) => {
       // Effectuer un appel gRPC au microservice d'auteurs
@@ -121,8 +121,20 @@ const resolvers = {
         console.error('Erreur lors de la suppression du livre dans MongoDB:', error);
         return false;
       }
-    }
-  }
+    },
+    // Récupérer tous les livres
+    getAllLivres: async () => {
+      try {
+        console.log('Début de la récupération de tous les livres...');
+        const livres = await Livre.find(); // Utiliser Mongoose pour récupérer tous les livres
+        console.log('Livres récupérés avec succès:', livres);
+        return livres;
+      } catch (error) {
+        console.error('Erreur lors de la récupération de tous les livres:', error);
+        throw new Error('Erreur lors de la récupération de tous les livres');
+      }
+    },
+  },
 };
 
 module.exports = resolvers;

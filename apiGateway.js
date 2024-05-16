@@ -1,13 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { ApolloServer } = require('apollo-server-express');
-const { graphqlHTTP } = require('express-graphql');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const mongoose = require('mongoose');
 
-// MongoDB Movie model
-const Movie = require('./models/Livre');
+// MongoDB Livre model
+const Livre = require('./models/Livre');
 
 // Load GraphQL type definitions
 const typeDefs = require('./schema');
@@ -53,21 +52,108 @@ const connectToMongoDB = async () => {
 app.post('/livres', async (req, res) => {
     try {
         const { titre, genre, auteur } = req.body;
-   
-        // You can perform any necessary validation or transformation here
-        
+
+        // Create a new instance of Livre
+        const newLivre = new Livre({ titre, genre, auteur });
+
+        // Save the book in MongoDB
+        const savedLivre = await newLivre.save();
+
+        console.log('Livre enregistré dans MongoDB:', savedLivre);
+
         // Create a gRPC client for LivreService
         const client = new livreProto.LivreService('localhost:50051', grpc.credentials.createInsecure());
-        
+
         // Make gRPC call to create a livre
         client.createLivre({ titre, genre, auteur }, (err, response) => {
             if (err) {
+                console.error('Erreur lors de l\'appel gRPC:', err);
                 res.status(500).json({ error: err.message });
             } else {
+                console.log('Livre enregistré dans le service gRPC:', response.livre);
                 res.status(201).json(response.livre);
             }
         });
     } catch (err) {
+        console.error('Erreur lors de la création du livre:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// REST endpoint for retrieving all livres
+app.get('/livres', async (req, res) => {
+    try {
+        // Retrieve all books from MongoDB
+        const livres = await Livre.find();
+
+        console.log('Livres récupérés depuis MongoDB:', livres);
+
+        res.status(200).json(livres);
+    } catch (err) {
+        console.error('Erreur lors de la récupération des livres:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// REST endpoint for deleting a livre by id
+app.delete('/livres/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Delete the book from MongoDB
+        const deletedLivre = await Livre.findByIdAndDelete(id);
+
+        if (!deletedLivre) {
+            return res.status(404).json({ error: 'Livre non trouvé' });
+        }
+
+        console.log('Livre supprimé avec succès:', deletedLivre);
+
+        // Make a gRPC call to delete the livre in the gRPC service
+        const client = new livreProto.LivreService('localhost:50051', grpc.credentials.createInsecure());
+        client.deleteLivre({ id }, (err, response) => {
+            if (err) {
+                console.error('Erreur lors de l\'appel gRPC pour supprimer le livre:', err);
+                res.status(500).json({ error: err.message });
+            } else {
+                console.log('Livre supprimé dans le service gRPC:', response);
+                res.status(200).json({ message: 'Livre supprimé avec succès' });
+            }
+        });
+    } catch (err) {
+        console.error('Erreur lors de la suppression du livre:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// REST endpoint for updating a livre by id
+app.put('/livres/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { titre, genre, auteur } = req.body;
+
+        // Update the book in MongoDB
+        const updatedLivre = await Livre.findByIdAndUpdate(id, { titre, genre, auteur }, { new: true });
+
+        if (!updatedLivre) {
+            return res.status(404).json({ error: 'Livre non trouvé' });
+        }
+
+        console.log('Livre mis à jour avec succès dans MongoDB:', updatedLivre);
+
+        // Make a gRPC call to update the livre in the gRPC service
+        const client = new livreProto.LivreService('localhost:50051', grpc.credentials.createInsecure());
+        client.updateLivre({ id, titre, genre, auteur }, (err, response) => {
+            if (err) {
+                console.error('Erreur lors de l\'appel gRPC pour mettre à jour le livre:', err);
+                res.status(500).json({ error: err.message });
+            } else {
+                console.log('Livre mis à jour dans le service gRPC:', response.livre);
+                res.status(200).json(response.livre);
+            }
+        });
+    } catch (err) {
+        console.error('Erreur lors de la mise à jour du livre:', err);
         res.status(500).json({ error: err.message });
     }
 });

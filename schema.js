@@ -20,11 +20,13 @@ type Query {
   livres: [Livre]
   auteur(id: String!): Auteur
   auteurs: [Auteur]
+  getAllLivres: [Livre]
 }
 
 type Mutation {
   createLivre(titre: String!, genre: String!, auteur: String!): Livre
   deleteLivre(id: String!): Boolean
+  getAllLivres: [Livre] # Ajout de la mutation pour récupérer tous les livres
 }
 `;
 
