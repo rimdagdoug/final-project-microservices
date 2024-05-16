@@ -19,6 +19,7 @@ Utilise Apollo Server pour exposer le schéma GraphQL et résoudre les requêtes
 Fournit également une API REST pour une compatibilité avec les clients REST existants.
 
 Technologies Utilisées
+
 Node.js : Environnement d'exécution pour le backend.
 Express.js : Framework web pour la création de l'API REST et la gestion des requêtes HTTP.
 gRPC : Système RPC (Remote Procedure Call) pour la communication inter-services.
